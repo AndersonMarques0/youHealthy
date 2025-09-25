@@ -27,7 +27,7 @@ class LoginPage extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/register');
+                Navigator.pushNamed(context, '/sign');
               },
               child: const Text('Criar conta'),
             ),

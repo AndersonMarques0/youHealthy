@@ -25,7 +25,7 @@ class YouHealthyApp extends StatelessWidget {
         '/welcome': (context) => const WelcomePage(),
         '/intro': (context) => const IntroPage(),
         '/login': (context) => const LoginPage(),
-        '/cadastrar': (context) => const SignPage(),
+        '/sign': (context) => const SignPage(),
         '/home': (context) => const HomePage(),
       },
     );
