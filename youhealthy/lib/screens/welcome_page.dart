@@ -16,7 +16,7 @@ class WelcomePage extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               Image.asset(
-                'assets/images/welcome.png',
+                'assets/images/treino.jpg',
                 fit: BoxFit.cover,
               ),
               
@@ -67,7 +67,7 @@ class WelcomePage extends StatelessWidget {
                             Navigator.pushNamed(context, '/intro');
                           },
                           child: Text(
-                            'Get started',
+                            'Começar',
                             style: TextStyle(
                               fontSize: screenWidth * 0.045,
                               color: Colors.black,

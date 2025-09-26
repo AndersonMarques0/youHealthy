@@ -19,3 +19,6 @@ flutter:
   uses-material-design: true
   assets:
    - assets/images/treino.jpg
+   - assets/images/saude.png
+   - assets/images/exercicios.png
+   - assets/images/frutas.png
