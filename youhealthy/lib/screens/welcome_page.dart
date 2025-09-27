@@ -12,7 +12,6 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   void initState() {
     super.initState();
-    // Travar somente em portrait nesta página
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -21,7 +20,6 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   void dispose() {
-    // Liberar todas orientações ao sair
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,

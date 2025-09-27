@@ -30,7 +30,6 @@ class _IntroPageState extends State<IntroPage> {
   @override
   void initState() {
     super.initState();
-    // Travar a orientação em portrait só nesta página
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -39,7 +38,6 @@ class _IntroPageState extends State<IntroPage> {
 
   @override
   void dispose() {
-    // Liberar orientação quando sair da página
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
