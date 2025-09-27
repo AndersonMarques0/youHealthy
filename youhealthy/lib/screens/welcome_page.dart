@@ -1,7 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
+
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Travar somente em portrait nesta página
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  @override
+  void dispose() {
+    // Liberar todas orientações ao sair
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +47,6 @@ class WelcomePage extends StatelessWidget {
                 'assets/images/treino.jpg',
                 fit: BoxFit.cover,
               ),
-              
               SafeArea(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
@@ -29,7 +56,6 @@ class WelcomePage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      
                       Column(
                         children: [
                           Text(
@@ -51,8 +77,6 @@ class WelcomePage extends StatelessWidget {
                           ),
                         ],
                       ),
-
-                      
                       SizedBox(
                         width: double.infinity,
                         height: screenHeight * 0.07,
