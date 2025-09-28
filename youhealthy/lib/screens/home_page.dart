@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:youhealthy/data/articles_data.dart';
 import 'package:youhealthy/models/artigo.dart';
 import 'article_page.dart';
@@ -21,6 +22,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _filteredArticles = allArticles;
+    
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 
   void _filterArticles(String tag) {
@@ -32,6 +40,15 @@ class _HomePageState extends State<HomePage> {
         _filteredArticles = allArticles.where((article) => article.tag == tag).toList();
       }
     });
+  }
+
+  void _navigateToArticle(Article article) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ArticlePage(article: article),
+      ),
+    );
   }
 
   Widget _buildCategoryChip(String text) {
@@ -51,36 +68,101 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.black87,
             fontWeight: FontWeight.bold,
+            fontSize: 13,
           ),
         ),
       ),
     );
   }
-
-  void _navigateToArticle(Article article) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ArticlePage(article: article),
+  
+  Widget _buildFeaturedArticleCard(Article article) {
+    return GestureDetector(
+      onTap: () => _navigateToArticle(article),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.network(
+              article.image,
+              height: 150, 
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            article.title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            "${article.time} • by ${article.author}",
+            style: const TextStyle(color: Colors.grey, fontSize: 13),
+          ),
+        ],
       ),
     );
   }
 
+  Widget _buildListTileArticle(Article article) {
+    return GestureDetector(
+      onTap: () => _navigateToArticle(article),
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            article.image,
+            width: 70,
+            height: 70,
+            fit: BoxFit.cover,
+          ),
+        ),
+        title: Text(
+          article.title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          "${article.time} • by ${article.author}",
+          style: const TextStyle(fontSize: 12),
+        ),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    final Article? featuredArticle = _filteredArticles.isNotEmpty ? _filteredArticles.first : null;
+    final mediaQuery = MediaQuery.of(context);
+    final double screenWidth = mediaQuery.size.width;
+    const double landscapeBreakpoint = 600.0;
+    final bool isNarrowView = screenWidth < landscapeBreakpoint;
+    final double titleFontSize = isNarrowView ? 24 : 28;
+    final double subtitleFontSize = isNarrowView ? 14 : 16;
+    final bool showBottomNav = isNarrowView; 
+
 
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        selectedItemColor: Colors.deepPurple, // Cor para o ícone selecionado
-        unselectedItemColor: Colors.grey, 
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-        ],
-      ),
+      bottomNavigationBar: showBottomNav
+          ? BottomNavigationBar(
+              currentIndex: 0,
+              selectedItemColor: Colors.deepPurple,
+              unselectedItemColor: Colors.grey, 
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+              ],
+            )
+          : null,
+      
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,29 +172,29 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           "Bom dia",
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: titleFontSize,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           "Segunda-feira, 25 de Janeiro de 2021",
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: Colors.grey, fontSize: subtitleFontSize),
                         ),
                       ],
                     ),
                   ),
                   Column(
-                    children: const [
-                      Icon(Icons.wb_sunny, color: Colors.orange),
-                      Text("28°C"),
+                    children: [
+                      Icon(Icons.wb_sunny, color: Colors.orange, size: titleFontSize),
+                      Text("28°C", style: TextStyle(fontSize: subtitleFontSize)),
                     ],
                   ),
                 ],
@@ -134,105 +216,52 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 10),
 
             Expanded(
-              child: _filteredArticles.isEmpty
-                  ? const Center(child: Text("Nenhum artigo encontrado nesta categoria."))
-                  : ListView.builder(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double availableWidth = constraints.maxWidth;
+
+                  if (_filteredArticles.isEmpty) {
+                    return const Center(child: Text("Nenhum artigo encontrado nesta categoria."));
+                  }
+
+                  if (availableWidth >= landscapeBreakpoint) {
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(16.0),
                       itemCount: _filteredArticles.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 20.0,
+                        mainAxisSpacing: 20.0,
+                        mainAxisExtent: 250,
+                      ),
                       itemBuilder: (context, index) {
                         final article = _filteredArticles[index];
-                        
-                        if (index == 0 && featuredArticle != null && _selectedTag != 'Todos') {
-                          return GestureDetector(
-                            onTap: () => _navigateToArticle(article),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(
-                                    article.image,
-                                    height: 180,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  article.title,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  "${article.time} • by ${article.author}",
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                            ),
-                          );
-                        } else if (index == 0 && _selectedTag == 'Todos' && featuredArticle != null) {
-                          return GestureDetector(
-                            onTap: () => _navigateToArticle(article),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(
-                                    article.image,
-                                    height: 180,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  article.title,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  "${article.time} • by ${article.author}",
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                            ),
-                          );
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: GestureDetector(
-                            onTap: () => _navigateToArticle(article),
-                            child: ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  article.image,
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              title: Text(
-                                article.title,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              subtitle: Text(
-                                "${article.time} • by ${article.author}",
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ),
-                          ),
-                        );
+                        return _buildFeaturedArticleCard(article);
                       },
-                    ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: _filteredArticles.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemBuilder: (context, index) {
+                      final article = _filteredArticles[index];
+                      
+                      if (index == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: _buildFeaturedArticleCard(article),
+                        );
+                      }
+                      
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: _buildListTileArticle(article),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),

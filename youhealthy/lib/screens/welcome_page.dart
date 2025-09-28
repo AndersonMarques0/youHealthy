@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -20,90 +21,100 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   void dispose() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+    
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final screenHeight = size.height;
-    final screenWidth = size.width;
+    final double paddingHorizontal = size.width * 0.06;
+    final double paddingVertical = size.height * 0.02;
 
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return Stack(
-            fit: StackFit.expand,
+      body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: size.height, 
+          ),
+          child: Stack(
             children: [
-              Image.asset(
-                'assets/images/treino.jpg',
-                fit: BoxFit.cover,
+              SizedBox(
+                height: size.height,
+                width: size.width,
+                child: Image.asset(
+                  'assets/images/treino.jpg', 
+                  fit: BoxFit.cover,
+                ),
               ),
               SafeArea(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.06,
-                    vertical: screenHeight * 0.02,
+                    horizontal: paddingHorizontal,
+                    vertical: paddingVertical,
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            'youHealthy',
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.05,
-                              color: Colors.white70,
+                  child: SizedBox(
+                    height: size.height - paddingVertical * 2 - MediaQuery.of(context).padding.top,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              'youhealthy',
+                              style: GoogleFonts.interTight(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: const Color.fromARGB(179, 136, 135, 135),
+                              ),
                             ),
-                          ),
-                          SizedBox(height: screenHeight * 0.02),
-                          Text(
-                            'Aprenda sobre saúde\n e musculação.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.07,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                            SizedBox(height: size.height * 0.02),
+                            Text(
+                              'Aprenda sobre saúde\n e musculação.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.interTight(
+                                fontSize: 30 + size.width * 0.01, 
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        width: double.infinity,
-                        height: screenHeight * 0.07,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/intro');
-                          },
-                          child: Text(
-                            'Começar',
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.045,
-                              color: Colors.black,
-                            ),
-                          ),
+                          ],
                         ),
-                      ),
-                    ],
+                        Column(
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              height: 55,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/intro');
+                                },
+                                child: const Text(
+                                  'Começar',
+                                  style: TextStyle(
+                                    fontSize: 18, 
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ],
-          );
-        },
+          ),
+        ),
       ),
     );
   }
