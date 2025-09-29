@@ -1,3 +1,5 @@
+// main.dart
+
 import 'package:flutter/material.dart';
 import 'package:youhealthy/screens/welcome_page.dart';
 import 'package:youhealthy/screens/home_page.dart';
@@ -16,20 +18,61 @@ class YouHealthyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final baseTextTheme = ThemeData.light().textTheme;
-    
+    const Color primaryColor = Colors.deepPurple;
+    const Color secondaryTextColor = Colors.grey;
+
     return MaterialApp(
       title: 'youHealthy',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primaryColor: primaryColor,
+        scaffoldBackgroundColor: Colors.white,
+        colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: primaryColor,
+          unselectedItemColor: secondaryTextColor,
+        ),
+        chipTheme: ChipThemeData(
+          backgroundColor: Colors.grey[200],
+          selectedColor: primaryColor,
+          labelStyle: GoogleFonts.interTight(
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+          secondaryLabelStyle: GoogleFonts.interTight(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
         textTheme: GoogleFonts.interTightTextTheme(
           baseTextTheme.copyWith(
+            headlineSmall: baseTextTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+              color: secondaryTextColor,
+            ),
+            titleMedium: baseTextTheme.titleMedium?.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            bodySmall: baseTextTheme.bodySmall?.copyWith(
+              color: secondaryTextColor,
+              fontSize: 13,
+            ),
             titleSmall: baseTextTheme.titleSmall?.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: const Color.fromARGB(179, 136, 135, 135),
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+            labelSmall: baseTextTheme.labelSmall?.copyWith(
+              fontSize: 12,
+              color: secondaryTextColor,
             ),
             headlineMedium: baseTextTheme.headlineMedium?.copyWith(
-              fontSize: 30, 
+              fontSize: 30,
               fontWeight: FontWeight.w600,
               color: Colors.black,
             ),
@@ -41,14 +84,15 @@ class YouHealthyApp extends StatelessWidget {
             titleLarge: baseTextTheme.titleLarge?.copyWith(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
+              color: primaryColor,
             ),
           ),
         ),
+        
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
-            foregroundColor: Colors.black, 
+            foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -58,19 +102,11 @@ class YouHealthyApp extends StatelessWidget {
             ),
           ),
         ),
-        buttonTheme: const ButtonThemeData(
-          buttonColor: Colors.deepPurple,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(25)),
-          ),
-        )
       ),
-      
       initialRoute: '/welcome',
-      
       routes: {
         '/welcome': (context) => const WelcomePage(),
-        '/intro': (context) => const IntroPage(), 
+        '/intro': (context) => const IntroPage(),
         '/login': (context) => const LoginPage(),
         '/sign': (context) => const SignPage(),
         '/home': (context) => const HomePage(),

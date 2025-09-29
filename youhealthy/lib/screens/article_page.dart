@@ -43,7 +43,7 @@ class ArticlePage extends StatelessWidget {
                 ),
               ),
               Text(
-                "by ${article.author} • ${article.time}",
+                "por ${article.author} • ${article.time}",
                 style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
 
