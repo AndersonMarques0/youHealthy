@@ -4,7 +4,7 @@ import 'package:youhealthy/screens/home_page.dart';
 import 'package:youhealthy/screens/login_page.dart';
 import 'package:youhealthy/screens/signup_page.dart';
 import 'package:youhealthy/screens/introdute_page.dart';
-import 'package:google_fonts/google_fonts.dart'; // Importação adicionada
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const YouHealthyApp());
@@ -29,9 +29,19 @@ class YouHealthyApp extends StatelessWidget {
               color: const Color.fromARGB(179, 136, 135, 135),
             ),
             headlineMedium: baseTextTheme.headlineMedium?.copyWith(
-              fontSize: 30,
+              fontSize: 30, 
               fontWeight: FontWeight.w600,
               color: Colors.black,
+            ),
+            bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            titleLarge: baseTextTheme.titleLarge?.copyWith(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
             ),
           ),
         ),
@@ -48,6 +58,12 @@ class YouHealthyApp extends StatelessWidget {
             ),
           ),
         ),
+        buttonTheme: const ButtonThemeData(
+          buttonColor: Colors.deepPurple,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(25)),
+          ),
+        )
       ),
       
       initialRoute: '/welcome',

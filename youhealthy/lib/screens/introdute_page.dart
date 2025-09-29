@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:youhealthy/widgets/intro_content_card.dart';
+import 'package:youhealthy/widgets/intro_dot_indicator.dart';
+import 'package:youhealthy/widgets/intro_button.dart';
 
 class IntroPage extends StatefulWidget {
   const IntroPage({super.key});
@@ -12,7 +15,7 @@ class _IntroPageState extends State<IntroPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<Map<String, String>> pages = [
+  final List<Map<String, String>> pages = const [
     {
       "image": "assets/images/saude.png",
       "text": "Crie hábitos saudáveis em seu dia a dia."
@@ -38,13 +41,17 @@ class _IntroPageState extends State<IntroPage> {
 
   @override
   void dispose() {
-    
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final titleStyle = Theme.of(context).textTheme.titleLarge;
+    final double responsiveTitleFontSize = (titleStyle?.fontSize ?? 24.0) + size.width * 0.02;
+    final double imageAreaHeight = size.height * 0.40;
+
 
     return Scaffold(
       body: LayoutBuilder(
@@ -58,17 +65,16 @@ class _IntroPageState extends State<IntroPage> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         "youHealthy",
-                        style: TextStyle(
-                          fontSize: size.width * 0.06,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
+                        style: titleStyle?.copyWith(
+                          fontSize: responsiveTitleFontSize,
                         ),
                       ),
+                      
                       SizedBox(height: size.height * 0.03),
-
                       SizedBox(
                         height: size.height * 0.60, 
                         child: PageView.builder(
@@ -81,89 +87,42 @@ class _IntroPageState extends State<IntroPage> {
                           },
                           itemBuilder: (context, index) {
                             final page = pages[index];
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  page["image"]!,
-                                  height: size.height * 0.40, 
-                                  fit: BoxFit.contain,
-                                ),
-                                SizedBox(height: size.height * 0.05),
-                                Text(
-                                  page["text"]!,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                            return IntroContentCard(
+                              imagePath: page["image"]!,
+                              text: page["text"]!,
+                              imageHeight: imageAreaHeight,
                             );
                           },
                         ),
                       ),
                       
                       SizedBox(height: size.height * 0.03),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
                           pages.length,
-                          (index) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: _currentPage == index ? 12 : 8,
-                            height: _currentPage == index ? 12 : 8,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _currentPage == index
-                                  ? Colors.deepPurple
-                                  : Colors.grey,
-                            ),
+                          (index) => IntroDotIndicator(
+                            index: index,
+                            currentPage: _currentPage,
                           ),
                         ),
                       ),
 
                       SizedBox(height: size.height * 0.03),
-
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 55,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/sign');
-                            },
-                            child: const Text(
-                              "Criar conta",
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      const IntroButton(),
+                      
                       SizedBox(height: size.height * 0.02),
                       GestureDetector(
                         onTap: () {
                           Navigator.pushNamed(context, '/login');
                         },
                         child: RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
+                          text: TextSpan(
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.black,
                               fontSize: 16,
                             ),
-                            children: [
+                            children: const [
                               TextSpan(text: "Você tem uma conta? "),
                               TextSpan(
                                 text: "Login",
