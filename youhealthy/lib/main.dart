@@ -1,5 +1,3 @@
-// main.dart
-
 import 'package:flutter/material.dart';
 import 'package:youhealthy/screens/welcome_page.dart';
 import 'package:youhealthy/screens/home_page.dart';
@@ -7,8 +5,20 @@ import 'package:youhealthy/screens/login_page.dart';
 import 'package:youhealthy/screens/signup_page.dart';
 import 'package:youhealthy/screens/introdute_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+const Color kPrimaryColor = Colors.deepPurple;
+const Color kSecondaryColor = Colors.grey;
+
+Future<void> main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const YouHealthyApp());
 }
 
@@ -17,9 +27,9 @@ class YouHealthyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseTextTheme = ThemeData.light().textTheme;
-    const Color primaryColor = Colors.deepPurple;
-    const Color secondaryTextColor = Colors.grey;
+  final baseTextTheme = ThemeData.light().textTheme;
+  const Color primaryColor = kPrimaryColor;
+  const Color secondaryTextColor = kSecondaryColor;
 
     return MaterialApp(
       title: 'youHealthy',
@@ -88,7 +98,6 @@ class YouHealthyApp extends StatelessWidget {
             ),
           ),
         ),
-        
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
@@ -108,7 +117,7 @@ class YouHealthyApp extends StatelessWidget {
         '/welcome': (context) => const WelcomePage(),
         '/intro': (context) => const IntroPage(),
         '/login': (context) => const LoginPage(),
-        '/sign': (context) => const SignPage(),
+        '/sign': (context) => const SignUpEmailScreen(),
         '/home': (context) => const HomePage(),
       },
     );

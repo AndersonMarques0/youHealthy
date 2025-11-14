@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:youhealthy/screens/home_page.dart';
+import '../services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final AuthService _authService = AuthService();
 
 const kPrimaryColor = Colors.deepPurple;
 const kSecondaryColor = Colors.grey;
@@ -25,28 +29,47 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _login() {
-
+  void _login() async {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login bem-sucedido!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      try {
+        await _authService.login(
+          _emailController.text,
+          _passwordController.text,
+        );
 
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const HomePage()),
-        (Route<dynamic> route) => false,
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Login bem-sucedido!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (route) => false,
+        );
+      } on FirebaseAuthException catch (e) {
+        String message = "Erro ao fazer login.";
+
+        if (e.code == "user-not-found") {
+          message = "Usuário não encontrado.";
+        } else if (e.code == "wrong-password") {
+          message = "Senha incorreta.";
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.red),
+        );
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Log in'),
+        title: const Text('Login'),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -89,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _passwordController,
                 obscureText: !_isPasswordVisible,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: 'Senha',
                   border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   ),
@@ -127,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                     
                   },
                   child: const Text(
-                    'Forgot password?',
+                    'Esqueci à senha?',
                     style: TextStyle(
                       color: kPrimaryColor,
                       fontWeight: FontWeight.bold,
@@ -139,17 +162,17 @@ class _LoginPageState extends State<LoginPage> {
 
               Text.rich(
                 TextSpan(
-                  text: 'By continuing, you agree to our ',
+                  text: 'Ao continuar, você concorda em nosso ',
                   style: TextStyle(color: kSecondaryColor),
                   children: const <TextSpan>[
                     TextSpan(
-                        text: 'Terms of Service',
+                        text: 'Termos de Serviço',
                         style: TextStyle(
                             color: kPrimaryColor,
                             decoration: TextDecoration.underline)),
-                    TextSpan(text: ' and '),
+                    TextSpan(text: ' e '),
                     TextSpan(
-                        text: 'Privacy Policy',
+                        text: 'Política de privacidade',
                         style: TextStyle(
                             color: kPrimaryColor,
                             decoration: TextDecoration.underline)),
@@ -172,7 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 child: const Text(
-                  'Log in',
+                  'Login',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),

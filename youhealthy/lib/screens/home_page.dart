@@ -174,14 +174,14 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Bom dia",
+                          "Boa noite",
                           style: textTheme.headlineSmall?.copyWith(
                             fontSize: titleFontSize,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "Segunda-feira, 25 de Janeiro de 2021",
+                          "Quarta-feira, 1 de Outubro de 2025",
                           style: textTheme.bodyMedium?.copyWith(
                             fontSize: subtitleFontSize,
                           ),
