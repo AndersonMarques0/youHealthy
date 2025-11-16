@@ -14,4 +14,16 @@ class Article {
     required this.image,
     required this.tag,
   });
+
+  
+  factory Article.fromMap(Map<String, dynamic> map) {
+    return Article(
+      title: map['title'] ?? '',
+      description: map['description'] ?? '',
+      author: map['author'] ?? '',
+      time: map['time'] ?? '',
+      image: map['image'] ?? '',
+      tag: map['tag'] ?? '',
+    );
+  }
 }

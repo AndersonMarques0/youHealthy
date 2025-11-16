@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/artigo.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -17,5 +18,24 @@ class FirestoreService {
 
   Future<void> deleteDocument(String collection, String docId) async {
     await _db.collection(collection).doc(docId).delete();
+  }
+
+  Future<List<Article>> getArticles() async {
+    try {
+      final snapshot = await _db.collection('articles').get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return Article(
+          title: data['title'] ?? '',
+          description: data['description'] ?? '',
+          author: data['author'] ?? '',
+          time: data['time'] ?? '',
+          image: data['image'] ?? '',
+          tag: data['tag'] ?? '',
+        );
+      }).toList();
+    } catch (e) {
+      throw Exception('Erro ao buscar artigos: $e');
+    }
   }
 }

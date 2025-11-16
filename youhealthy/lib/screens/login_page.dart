@@ -32,37 +32,40 @@ class _LoginPageState extends State<LoginPage> {
   void _login() async {
     if (_formKey.currentState!.validate()) {
       try {
-        await _authService.login(
+        final authService = AuthService();
+
+        await authService.login(
           _emailController.text,
           _passwordController.text,
         );
 
+        final isAdmin = await authService.isAdmin(); // AGORA VERIFICA ANTES DA HOME
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Login bem-sucedido!"),
+          SnackBar(
+            content: Text(isAdmin
+                ? "Login de administrador bem-sucedido!"
+                : "Login bem-sucedido!"),
             backgroundColor: Colors.green,
           ),
         );
 
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(
+            builder: (context) => HomePage(isAdmin: isAdmin), // ← envia pro HomePage
+          ),
           (route) => false,
         );
       } on FirebaseAuthException catch (e) {
-        String message = "Erro ao fazer login.";
-
-        if (e.code == "user-not-found") {
-          message = "Usuário não encontrado.";
-        } else if (e.code == "wrong-password") {
-          message = "Senha incorreta.";
-        }
-
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text("Erro ao fazer login: ${e.message}"),
+              backgroundColor: Colors.red),
         );
       }
     }
   }
+
 
 
   @override
