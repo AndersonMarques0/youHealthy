@@ -40,16 +40,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      _buildHomeContent(),       // Index 0
-      const FavoritesPage(),     // Index 1
-      const NotificationsPage(), // Index 2
-      const SettingsPage(),      // Index 3
+      _buildHomeContent(),      
+      const FavoritesPage(),    
+      const NotificationsPage(),
+      const SettingsPage(),     
     ];
 
     return Scaffold(
       body: pages[_currentIndex],
-
-      // Botões inferiores
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         selectedItemColor: Colors.deepPurple,
@@ -81,9 +79,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ------------------------------------------------------------
-  // HOME CONTENT — layout parecido com a imagem
-  // ------------------------------------------------------------
   Widget _buildHomeContent() {
     final today = DateFormat("EEEE, MMMM d, yyyy").format(DateTime.now());
 
@@ -91,10 +86,6 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          // ------------------------------
-          // HEADER
-          // ------------------------------
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -119,8 +110,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-
-                // ícone clima
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: const [
@@ -131,10 +120,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-
-          // ------------------------------
-          // CATEGORIES (horizontal)
-          // ------------------------------
           SizedBox(
             height: 40,
             child: ListView.builder(
@@ -166,10 +151,6 @@ class _HomePageState extends State<HomePage> {
           ),
 
           const SizedBox(height: 20),
-
-          // ------------------------------
-          // LISTA DE ARTIGOS
-          // ------------------------------
           Expanded(
             child: FutureBuilder<List<Article>>(
               future: _articlesFuture,
@@ -208,7 +189,6 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Thumbnail
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
                               child: Image.network(
@@ -219,8 +199,6 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             const SizedBox(height: 8),
-
-                            // Título
                             Text(
                               article.title,
                               style: const TextStyle(
@@ -230,8 +208,6 @@ class _HomePageState extends State<HomePage> {
                             ),
 
                             const SizedBox(height: 4),
-
-                            // Info
                             Text(
                               "${article.time} • by ${article.author}",
                               style: TextStyle(

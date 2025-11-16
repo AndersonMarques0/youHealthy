@@ -50,16 +50,13 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              // Indicador de progresso (a linha roxa)
               const LinearProgressIndicator(
-                value: 0.5, // 50% completo
+                value: 0.5,
                 backgroundColor: kSecondaryColor,
                 valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
                 minHeight: 5,
               ),
               const SizedBox(height: 30),
-
-              // Título
               const Text(
                 'Primeiro, escreva seu e-mail.',
                 style: TextStyle(
@@ -69,13 +66,11 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-
-              // Campo de E-mail
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
-                  hintText: '', // O campo no design está em branco
+                  hintText: '',
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Por favor, digite seu e-mail.';
@@ -83,9 +78,7 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                   return null;
                 },
               ),
-              const Spacer(), // Empurra o botão para baixo
-
-              // Botão "Continue"
+              const Spacer(),
               ElevatedButton(
                 onPressed: _goToPassword,
                 style: ElevatedButton.styleFrom(backgroundColor: kPrimaryColor),
@@ -99,7 +92,6 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
   }
 }
 
-// --- Etapa 2: Senha ---
 class SignUpPasswordScreen extends StatefulWidget {
   final String email;
   const SignUpPasswordScreen({super.key, required this.email});
@@ -170,16 +162,13 @@ class _SignUpPasswordScreenState extends State<SignUpPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              // Indicador de progresso (a linha roxa)
               const LinearProgressIndicator(
-                value: 1.0, // 100% completo
+                value: 1.0,
                 backgroundColor: kSecondaryColor,
                 valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
                 minHeight: 5,
               ),
               const SizedBox(height: 30),
-
-              // Título
               const Text(
                 'Agora, crie uma senha.',
                 style: TextStyle(
@@ -190,16 +179,13 @@ class _SignUpPasswordScreenState extends State<SignUpPasswordScreen> {
               ),
               const SizedBox(height: 30),
 
-              // Mostra o email para confirmação
               Text('E-mail: ${widget.email}', style: const TextStyle(color: Colors.black54)),
               const SizedBox(height: 10),
-
-              // Campo de Senha
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  hintText: '', // O campo no design está em branco
+                  hintText: '',
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Por favor, digite sua senha.';
@@ -207,8 +193,7 @@ class _SignUpPasswordScreenState extends State<SignUpPasswordScreen> {
                   return null;
                 },
               ),
-              const Spacer(), // Empurra o botão para baixo
-
+              const Spacer(),
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(

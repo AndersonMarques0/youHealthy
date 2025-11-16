@@ -3,8 +3,6 @@ import 'package:youhealthy/screens/home_page.dart';
 import '../services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-final AuthService _authService = AuthService();
-
 const kPrimaryColor = Colors.deepPurple;
 const kSecondaryColor = Colors.grey;
 
@@ -39,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
           _passwordController.text,
         );
 
-        final isAdmin = await authService.isAdmin(); // AGORA VERIFICA ANTES DA HOME
+        final isAdmin = await authService.isAdmin();
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -52,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
 
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => HomePage(isAdmin: isAdmin), // ← envia pro HomePage
+            builder: (context) => HomePage(isAdmin: isAdmin),
           ),
           (route) => false,
         );
