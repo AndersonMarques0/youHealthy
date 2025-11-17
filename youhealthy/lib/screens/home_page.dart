@@ -18,7 +18,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Future<List<Article>> _articlesFuture;
   int _currentIndex = 0;
 
   final List<String> categories = [
@@ -34,7 +33,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _articlesFuture = FirestoreService().getArticles();
   }
 
   @override
@@ -152,8 +150,8 @@ class _HomePageState extends State<HomePage> {
 
           const SizedBox(height: 20),
           Expanded(
-            child: FutureBuilder<List<Article>>(
-              future: _articlesFuture,
+            child: StreamBuilder<List<Article>>(
+              stream: FirestoreService().streamArticles(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -206,7 +204,6 @@ class _HomePageState extends State<HomePage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             const SizedBox(height: 4),
                             Text(
                               "${article.time} • by ${article.author}",
@@ -224,6 +221,7 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
+
         ],
       ),
     );
