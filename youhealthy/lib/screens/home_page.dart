@@ -21,11 +21,10 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<String> categories = [
-    "World",
-    "U.S.",
-    "Politics",
-    "Tech",
-    "Sports",
+    "Todos",
+    "Saúde",
+    "Treino",
+    "Esporte",
   ];
 
   int selectedCategoryIndex = 0;
@@ -35,13 +34,33 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  // Saudação dinâmica
+  String _greetingMessage() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) return 'Bom dia';
+    if (hour >= 12 && hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  }
+
+  // Data formatada PT-BR
+  String _formattedDatePtBr() {
+    try {
+      final df = DateFormat("EEEE, d 'de' MMMM 'de' y", 'pt_BR');
+      final formatted = df.format(DateTime.now());
+      return formatted[0].toUpperCase() + formatted.substring(1);
+    } catch (_) {
+      final now = DateTime.now();
+      return '${now.day}/${now.month}/${now.year}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [
-      _buildHomeContent(),      
-      const FavoritesPage(),    
+      _buildHomeContent(),
+      const FavoritesPage(),
       const NotificationsPage(),
-      const SettingsPage(),     
+      const SettingsPage(),
     ];
 
     return Scaffold(
@@ -59,7 +78,6 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Configurações"),
         ],
       ),
-
       floatingActionButton: widget.isAdmin && _currentIndex == 0
           ? FloatingActionButton(
               backgroundColor: Colors.deepPurple,
@@ -78,12 +96,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomeContent() {
-    final today = DateFormat("EEEE, MMMM d, yyyy").format(DateTime.now());
+    final today = _formattedDatePtBr();
+    final greeting = _greetingMessage();
 
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -92,9 +112,9 @@ class _HomePageState extends State<HomePage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Good morning",
-                      style: TextStyle(
+                    Text(
+                      greeting,
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
@@ -118,6 +138,8 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+
+          // Categorias
           SizedBox(
             height: 40,
             child: ListView.builder(
@@ -149,6 +171,8 @@ class _HomePageState extends State<HomePage> {
           ),
 
           const SizedBox(height: 20),
+
+          // Lista de artigos
           Expanded(
             child: StreamBuilder<List<Article>>(
               stream: FirestoreService().streamArticles(),
@@ -158,12 +182,17 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 if (snapshot.hasError) {
-                  return Center(
-                    child: Text("Erro ao carregar: ${snapshot.error}"),
-                  );
+                  return Center(child: Text("Erro ao carregar: ${snapshot.error}"));
                 }
 
-                final articles = snapshot.data ?? [];
+                List<Article> articles = snapshot.data ?? [];
+
+                // Filtragem
+                final selectedCategory = categories[selectedCategoryIndex];
+
+                if (selectedCategory != "Todos") {
+                  articles = articles.where((a) => a.tag == selectedCategory).toList();
+                }
 
                 if (articles.isEmpty) {
                   return const Center(child: Text("Nenhum artigo encontrado."));
@@ -206,7 +235,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "${article.time} • by ${article.author}",
+                              "${article.time} • por ${article.author}",
                               style: TextStyle(
                                 color: Colors.grey.shade600,
                                 fontSize: 13,
@@ -221,7 +250,6 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
-
         ],
       ),
     );

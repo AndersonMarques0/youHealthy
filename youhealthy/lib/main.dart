@@ -7,6 +7,7 @@ import 'package:youhealthy/screens/introdute_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 const Color kPrimaryColor = Colors.deepPurple;
 const Color kSecondaryColor = Colors.grey;
@@ -14,6 +15,8 @@ const Color kSecondaryColor = Colors.grey;
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  await initializeDateFormatting('pt_BR', null);
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

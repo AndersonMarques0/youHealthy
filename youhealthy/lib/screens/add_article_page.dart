@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
-
-final logger = Logger();
+import 'package:youhealthy/models/artigo.dart';
+import 'package:youhealthy/services/firestore_service.dart';
 
 class AddArticlePage extends StatefulWidget {
-  const AddArticlePage({super.key});
+  final Article? articleToEdit;
+
+  const AddArticlePage({super.key, this.articleToEdit});
 
   @override
   _AddArticlePageState createState() => _AddArticlePageState();
@@ -13,52 +13,80 @@ class AddArticlePage extends StatefulWidget {
 
 class _AddArticlePageState extends State<AddArticlePage> {
   final _formKey = GlobalKey<FormState>();
+
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _authorController = TextEditingController();
   final _timeController = TextEditingController();
   final _imageController = TextEditingController();
-  final _tagController = TextEditingController();
+
+  String? _selectedCategory;
+
+  final List<String> categorias = [
+    "Saúde",
+    "Treino",
+    "Esporte",
+  ];
 
   @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _authorController.dispose();
-    _timeController.dispose();
-    _imageController.dispose();
-    _tagController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    if (widget.articleToEdit != null) {
+      final a = widget.articleToEdit!;
+      _titleController.text = a.title;
+      _descriptionController.text = a.description;
+      _authorController.text = a.author;
+      _timeController.text = a.time;
+      _imageController.text = a.image;
+      _selectedCategory = a.tag;
+    }
   }
 
-  void _saveArticle() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        await FirebaseFirestore.instance.collection('articles').add({
-          'title': _titleController.text,
-          'description': _descriptionController.text,
-          'author': _authorController.text,
-          'time': _timeController.text,
-          'image': _imageController.text,
-          'tag': _tagController.text,
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Artigo salvo com sucesso!')),
-        );
-        Navigator.pop(context);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar artigo: $e')),
-        );
+  Future<void> _saveArticle() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final newArticle = Article(
+      id: widget.articleToEdit?.id ?? "",
+      title: _titleController.text,
+      description: _descriptionController.text,
+      author: _authorController.text,
+      time: _timeController.text,
+      image: _imageController.text,
+      tag: _selectedCategory!,
+    );
+
+    try {
+      final service = FirestoreService();
+
+      if (widget.articleToEdit == null) {
+        await service.addArticle(newArticle);
+      } else {
+        await service.updateArticle(widget.articleToEdit!.id, newArticle);
       }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(widget.articleToEdit == null
+              ? "Artigo criado com sucesso!"
+              : "Artigo atualizado com sucesso!"),
+        ),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erro ao salvar: $e")),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.articleToEdit != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adicionar Artigo'),
+        title: Text(isEditing ? "Editar Artigo" : "Adicionar Artigo"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -69,68 +97,53 @@ class _AddArticlePageState extends State<AddArticlePage> {
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(labelText: 'Título'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira o título';
-                  }
-                  return null;
-                },
+                validator: (v) => v!.isEmpty ? 'Insira o título' : null,
               ),
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Descrição'),
                 maxLines: 3,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira a descrição';
-                  }
-                  return null;
-                },
+                validator: (v) => v!.isEmpty ? 'Insira a descrição' : null,
               ),
               TextFormField(
                 controller: _authorController,
                 decoration: const InputDecoration(labelText: 'Autor'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira o autor';
-                  }
-                  return null;
-                },
+                validator: (v) => v!.isEmpty ? 'Insira o autor' : null,
               ),
               TextFormField(
                 controller: _timeController,
-                decoration: const InputDecoration(labelText: 'Tempo'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira o tempo';
-                  }
-                  return null;
-                },
+                decoration: const InputDecoration(labelText: 'Tempo de leitura'),
+                validator: (v) => v!.isEmpty ? 'Insira o tempo' : null,
               ),
               TextFormField(
                 controller: _imageController,
                 decoration: const InputDecoration(labelText: 'URL da Imagem'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira a URL da imagem';
-                  }
-                  return null;
-                },
+                validator: (v) => v!.isEmpty ? 'Insira a URL' : null,
               ),
-              TextFormField(
-                controller: _tagController,
-                decoration: const InputDecoration(labelText: 'Tag'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira a tag';
-                  }
-                  return null;
-                },
+
+              const SizedBox(height: 16),
+
+              DropdownButtonFormField<String>(
+                initialValue: _selectedCategory,
+                decoration: const InputDecoration(
+                  labelText: "Categoria",
+                  border: OutlineInputBorder(),
+                ),
+                items: categorias
+                    .map((c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(c),
+                        ))
+                    .toList(),
+                onChanged: (value) => setState(() => _selectedCategory = value),
+                validator: (v) => v == null ? "Escolha uma categoria" : null,
               ),
+
               const SizedBox(height: 20),
+
               ElevatedButton(
                 onPressed: _saveArticle,
-                child: const Text('Salvar Artigo'),
+                child: Text(isEditing ? "Salvar Alterações" : "Criar Artigo"),
               ),
             ],
           ),

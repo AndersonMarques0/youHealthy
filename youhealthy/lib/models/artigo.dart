@@ -1,4 +1,5 @@
 class Article {
+  final String id;
   final String title;
   final String description;
   final String author;
@@ -7,6 +8,7 @@ class Article {
   final String tag;
 
   const Article({
+    required this.id,
     required this.title,
     required this.description,
     required this.author,
@@ -15,9 +17,9 @@ class Article {
     required this.tag,
   });
 
-  
-  factory Article.fromMap(Map<String, dynamic> map) {
+  factory Article.fromMap(String id, Map<String, dynamic> map) {
     return Article(
+      id: id,
       title: map['title'] ?? '',
       description: map['description'] ?? '',
       author: map['author'] ?? '',
