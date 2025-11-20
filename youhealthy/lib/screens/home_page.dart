@@ -23,11 +23,6 @@ class _HomePageState extends State<HomePage> {
 
   final _service = FirestoreService();
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   String _greetingMessage() {
     final hour = DateTime.now().hour;
     if (hour >= 5 && hour < 12) return 'Bom dia';
@@ -82,6 +77,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // ============================================================
+  // CONTEÚDO DA HOME
+  // ============================================================
   Widget _buildHomeContent() {
     final today = _formattedDatePtBr();
     final greeting = _greetingMessage();
@@ -90,28 +88,46 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // HEADER
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(greeting, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                  Text(today, style: TextStyle(fontSize: 15, color: Colors.grey.shade600)),
-                ]),
-                Column(crossAxisAlignment: CrossAxisAlignment.end, children: const [
-                  Icon(Icons.wb_sunny, color: Colors.orange, size: 28),
-                  Text("28°C"),
-                ]),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      greeting,
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      today,
+                      style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: const [
+                    Icon(Icons.wb_sunny, color: Colors.orange, size: 28),
+                    Text("28°C"),
+                  ],
+                ),
               ],
             ),
           ),
+
+          // CATEGORIAS
           SizedBox(
             height: 48,
             child: StreamBuilder<List<Category>>(
               stream: _service.streamCategories(),
               builder: (context, snapshot) {
-                final categories = <Category>[Category(id: 'all', name: 'Todos')] + (snapshot.data ?? []);
+                final categories = <Category>[
+                  Category(id: 'all', name: 'Todos')
+                ] + (snapshot.data ?? []);
+
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -119,6 +135,7 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                     final selected = selectedCategoryIndex == index;
                     final cat = categories[index];
+
                     return GestureDetector(
                       onTap: () => setState(() => selectedCategoryIndex = index),
                       child: Container(
@@ -128,7 +145,13 @@ class _HomePageState extends State<HomePage> {
                           color: selected ? Colors.deepPurple : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(cat.name, style: TextStyle(color: selected ? Colors.white : Colors.black87, fontWeight: FontWeight.w600)),
+                        child: Text(
+                          cat.name,
+                          style: TextStyle(
+                            color: selected ? Colors.white : Colors.black87,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -136,47 +159,148 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
+
           const SizedBox(height: 16),
+
+          // ARTIGOS
           Expanded(
             child: StreamBuilder<List<Article>>(
               stream: _service.streamArticles(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-                if (snapshot.hasError) return Center(child: Text('Erro: ${snapshot.error}'));
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Erro: ${snapshot.error}'));
+                }
 
                 final articles = snapshot.data ?? [];
+
                 return StreamBuilder<List<Category>>(
                   stream: _service.streamCategories(),
                   builder: (context, catSnap) {
-                    final cats = <Category>[Category(id: 'all', name: 'Todos')] + (catSnap.data ?? []);
-                    final selectedCat = cats.length > selectedCategoryIndex ? cats[selectedCategoryIndex] : cats.first;
+                    final cats = <Category>[
+                      Category(id: 'all', name: 'Todos')
+                    ] + (catSnap.data ?? []);
 
-                    List<Article> filtered = articles;
-                    if (selectedCat.id != 'all') {
-                      filtered = articles.where((a) => a.tag == selectedCat.name).toList();
+                    final selectedCat = cats.length > selectedCategoryIndex
+                        ? cats[selectedCategoryIndex]
+                        : cats.first;
+
+                    // FILTRAR
+                    List<Article> filtered = selectedCat.id == 'all'
+                        ? articles
+                        : articles.where((a) => a.tag == selectedCat.name).toList();
+
+                    if (filtered.isEmpty) {
+                      return const Center(child: Text('Nenhum artigo encontrado.'));
                     }
 
-                    if (filtered.isEmpty) return const Center(child: Text('Nenhum artigo encontrado.'));
+                    final highlight = filtered.first;
+                    final rest = filtered.skip(1).toList();
 
-                    return ListView.builder(
+                    // LISTA FINAL
+                    return ListView(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final article = filtered[index];
-                        return GestureDetector(
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ArticlePage(article: article))),
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network(article.image, height: 200, width: double.infinity, fit: BoxFit.cover)),
-                              const SizedBox(height: 8),
-                              Text(article.title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                      children: [
+                        // ====================================================
+                        // CARD DE DESTAQUE
+                        // ====================================================
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ArticlePage(article: highlight),
+                              ),
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.network(
+                                  highlight.image,
+                                  height: 260,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                highlight.title,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               const SizedBox(height: 4),
-                              Text('${article.time} • por ${article.author}', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-                            ]),
+                              Text(
+                                '${highlight.time} • por ${highlight.author}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
                           ),
-                        );
-                      },
+                        ),
+                        ...rest.map(
+                          (article) => GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => ArticlePage(article: article)),
+                              );
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 18),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      article.image,
+                                      width: 100,
+                                      height: 70,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          article.title,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${article.time} • por ${article.author}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     );
                   },
                 );
