@@ -19,22 +19,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-
-  final List<String> categories = [
-    "Todos",
-    "Saúde",
-    "Treino",
-    "Esporte",
-  ];
-
   int selectedCategoryIndex = 0;
+
+  final _service = FirestoreService();
 
   @override
   void initState() {
     super.initState();
   }
 
-  // Saudação dinâmica
   String _greetingMessage() {
     final hour = DateTime.now().hour;
     if (hour >= 5 && hour < 12) return 'Bom dia';
@@ -42,7 +35,6 @@ class _HomePageState extends State<HomePage> {
     return 'Boa noite';
   }
 
-  // Data formatada PT-BR
   String _formattedDatePtBr() {
     try {
       final df = DateFormat("EEEE, d 'de' MMMM 'de' y", 'pt_BR');
@@ -83,12 +75,7 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Colors.deepPurple,
               child: const Icon(Icons.add, color: Colors.white),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AddArticlePage(),
-                  ),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AddArticlePage()));
               },
             )
           : null,
@@ -103,147 +90,93 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      greeting,
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      today,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: const [
-                    Icon(Icons.wb_sunny, color: Colors.orange, size: 28),
-                    Text("28°C"),
-                  ],
-                )
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(greeting, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                  Text(today, style: TextStyle(fontSize: 15, color: Colors.grey.shade600)),
+                ]),
+                Column(crossAxisAlignment: CrossAxisAlignment.end, children: const [
+                  Icon(Icons.wb_sunny, color: Colors.orange, size: 28),
+                  Text("28°C"),
+                ]),
               ],
             ),
           ),
-
-          // Categorias
           SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final selected = selectedCategoryIndex == index;
-                return GestureDetector(
-                  onTap: () => setState(() => selectedCategoryIndex = index),
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selected ? Colors.deepPurple : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      categories[index],
-                      style: TextStyle(
-                        color: selected ? Colors.white : Colors.black87,
-                        fontWeight: FontWeight.w600,
+            height: 48,
+            child: StreamBuilder<List<Category>>(
+              stream: _service.streamCategories(),
+              builder: (context, snapshot) {
+                final categories = <Category>[Category(id: 'all', name: 'Todos')] + (snapshot.data ?? []);
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final selected = selectedCategoryIndex == index;
+                    final cat = categories[index];
+                    return GestureDetector(
+                      onTap: () => setState(() => selectedCategoryIndex = index),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: selected ? Colors.deepPurple : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(cat.name, style: TextStyle(color: selected ? Colors.white : Colors.black87, fontWeight: FontWeight.w600)),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
             ),
           ),
-
-          const SizedBox(height: 20),
-
-          // Lista de artigos
+          const SizedBox(height: 16),
           Expanded(
             child: StreamBuilder<List<Article>>(
-              stream: FirestoreService().streamArticles(),
+              stream: _service.streamArticles(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+                if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+                if (snapshot.hasError) return Center(child: Text('Erro: ${snapshot.error}'));
 
-                if (snapshot.hasError) {
-                  return Center(child: Text("Erro ao carregar: ${snapshot.error}"));
-                }
+                final articles = snapshot.data ?? [];
+                return StreamBuilder<List<Category>>(
+                  stream: _service.streamCategories(),
+                  builder: (context, catSnap) {
+                    final cats = <Category>[Category(id: 'all', name: 'Todos')] + (catSnap.data ?? []);
+                    final selectedCat = cats.length > selectedCategoryIndex ? cats[selectedCategoryIndex] : cats.first;
 
-                List<Article> articles = snapshot.data ?? [];
+                    List<Article> filtered = articles;
+                    if (selectedCat.id != 'all') {
+                      filtered = articles.where((a) => a.tag == selectedCat.name).toList();
+                    }
 
-                // Filtragem
-                final selectedCategory = categories[selectedCategoryIndex];
+                    if (filtered.isEmpty) return const Center(child: Text('Nenhum artigo encontrado.'));
 
-                if (selectedCategory != "Todos") {
-                  articles = articles.where((a) => a.tag == selectedCategory).toList();
-                }
-
-                if (articles.isEmpty) {
-                  return const Center(child: Text("Nenhum artigo encontrado."));
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: articles.length,
-                  itemBuilder: (context, index) {
-                    final article = articles[index];
-
-                    return GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ArticlePage(article: article),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                article.image,
-                                height: 200,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              article.title,
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "${article.time} • por ${article.author}",
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    return ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final article = filtered[index];
+                        return GestureDetector(
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ArticlePage(article: article))),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network(article.image, height: 200, width: double.infinity, fit: BoxFit.cover)),
+                              const SizedBox(height: 8),
+                              Text(article.title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Text('${article.time} • por ${article.author}', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                            ]),
+                          ),
+                        );
+                      },
                     );
                   },
                 );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:youhealthy/models/artigo.dart';
 import 'package:youhealthy/services/auth_service.dart';
 import 'package:youhealthy/services/firestore_service.dart';
@@ -18,10 +19,12 @@ class ArticlePage extends StatefulWidget {
 
 class _ArticlePageState extends State<ArticlePage> {
   bool isAdmin = false;
+  late final String uid;
 
   @override
   void initState() {
     super.initState();
+    uid = FirebaseAuth.instance.currentUser!.uid;
     _checkAdmin();
   }
 
@@ -92,59 +95,83 @@ class _ArticlePageState extends State<ArticlePage> {
             )
           : null,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black54),
-                onPressed: () => Navigator.pop(context),
-              ),
+        child: StreamBuilder<List<String>>(
+          stream: FirestoreService().streamFavoriteIds(uid),
+          builder: (context, snapshot) {
+            final favIds = snapshot.data ?? [];
+            final isFav = favIds.contains(widget.article.id);
 
-              const SizedBox(height: 8),
-              Text(
-                widget.article.tag.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.purple,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
-                ),
-              ),
-              const SizedBox(height: 8),
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.black54),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: isFav ? Colors.red : Colors.grey,
+                          size: 28,
+                        ),
+                        onPressed: () {
+                          FirestoreService().toggleFavorite(uid, widget.article.id);
+                        },
+                      ),
+                    ],
+                  ),
 
-              Text(
-                widget.article.title,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "por ${widget.article.author} • ${widget.article.time}",
-                style: const TextStyle(color: Colors.grey, fontSize: 14),
-              ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.article.tag.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.purple,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
 
-              const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.article.title,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
 
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  widget.article.image,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: 200,
-                ),
-              ),
+                  Text(
+                    "por ${widget.article.author} • ${widget.article.time}",
+                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
 
-              const SizedBox(height: 16),
-              Text(
-                widget.article.description,
-                style: const TextStyle(fontSize: 16, height: 1.6, color: Colors.black87),
+                  const SizedBox(height: 16),
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      widget.article.image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: 200,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  Text(
+                    widget.article.description,
+                    style: const TextStyle(fontSize: 16, height: 1.6, color: Colors.black87),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
