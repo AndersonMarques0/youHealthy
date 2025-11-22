@@ -121,6 +121,11 @@ class AuthService {
 
     logger.i("Documento do usuário criado em Firestore.");
   }
+
+  String? getCurrentUserEmail() {
+    return _auth.currentUser?.email;
+  }
+
 }
 
 class UserService {
