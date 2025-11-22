@@ -41,6 +41,13 @@ class _IntroPageState extends State<IntroPage> {
 
   @override
   void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
     _pageController.dispose();
     super.dispose();
   }
@@ -49,9 +56,9 @@ class _IntroPageState extends State<IntroPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final titleStyle = Theme.of(context).textTheme.titleLarge;
-    final double responsiveTitleFontSize = (titleStyle?.fontSize ?? 24.0) + size.width * 0.02;
+    final double responsiveTitleFontSize =
+        (titleStyle?.fontSize ?? 24.0) + size.width * 0.02;
     final double imageAreaHeight = size.height * 0.40;
-
 
     return Scaffold(
       body: LayoutBuilder(
@@ -63,7 +70,8 @@ class _IntroPageState extends State<IntroPage> {
               ),
               child: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0, vertical: 16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -73,10 +81,10 @@ class _IntroPageState extends State<IntroPage> {
                           fontSize: responsiveTitleFontSize,
                         ),
                       ),
-                      
                       SizedBox(height: size.height * 0.03),
+
                       SizedBox(
-                        height: size.height * 0.60, 
+                        height: size.height * 0.60,
                         child: PageView.builder(
                           controller: _pageController,
                           itemCount: pages.length,
@@ -95,8 +103,9 @@ class _IntroPageState extends State<IntroPage> {
                           },
                         ),
                       ),
-                      
+
                       SizedBox(height: size.height * 0.03),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
@@ -110,7 +119,7 @@ class _IntroPageState extends State<IntroPage> {
 
                       SizedBox(height: size.height * 0.03),
                       const IntroButton(),
-                      
+
                       SizedBox(height: size.height * 0.02),
                       GestureDetector(
                         onTap: () {
@@ -118,10 +127,13 @@ class _IntroPageState extends State<IntroPage> {
                         },
                         child: RichText(
                           text: TextSpan(
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                ),
                             children: const [
                               TextSpan(text: "Você tem uma conta? "),
                               TextSpan(
